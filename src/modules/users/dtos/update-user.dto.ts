@@ -8,7 +8,7 @@ enum Gender {
 export class UpdateUserDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  username: string;
 
   @IsNotEmpty()
   @IsEnum(Gender, { message: 'gender must be either male or female' })

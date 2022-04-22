@@ -1,4 +1,9 @@
-import { Injectable, Inject, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from './user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { USER_REPOSITORY } from '../../core/constants';
@@ -27,9 +32,9 @@ export class UsersService {
     return this.userResponse(user);
   }
 
-  async updateProfile(id: number, name: string, gender: string): Promise<User> {
+  async updateProfile(id: number, username: string): Promise<User> {
     const user = await this.findOneById(id);
-    await user.update({ name, gender });
+    await user.update({ username });
     await user.save();
     return this.userResponse(user);
   }
@@ -48,8 +53,22 @@ export class UsersService {
     await user.save();
   }
 
+  async changeAvatar(id: number, avatar: string) {
+    const user = await this.findOneById(id);
+    await user.update({ avatar });
+    await user.save();
+  }
+
+  async getAvatar(id: number) {
+    const user = await this.findOneById(id);
+    if (!user) {
+      throw new NotFoundException('User Not Found');
+    }
+    return user.avatar;
+  }
+
   userResponse(user) {
-    const { password, ...result } = user['dataValues'];
+    const { password, avatar, ...result } = user['dataValues'];
     return result;
   }
 

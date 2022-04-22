@@ -7,12 +7,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     credentials: true,
-    origin: process.env.CORS_ORIGIN_WHITELIST,
+    origin: process.env.CORS_ORIGIN_WHITELIST || true,
   });
 
   app.use(cookieParser(process.env.COOKIES_SECRET));
   //global prefix
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api');
 
   // handle all user input validation globally
   app.useGlobalPipes(new ValidateInputPipe());

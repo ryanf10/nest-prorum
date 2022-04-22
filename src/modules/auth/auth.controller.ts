@@ -22,7 +22,7 @@ export class AuthController {
   async login(@Request() req, @Res({ passthrough: true }) response) {
     const { user, token } = await this.authService.login(req.user);
     response.cookie('token', token, {
-      maxAge: 48 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       signed: true,
     });
@@ -31,9 +31,17 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signUp(@Body() body: CreateUserDto) {
-    const user = await this.authService.create(body);
-    return { messages: 'User created', result: user };
+  async signUp(
+    @Body() body: CreateUserDto,
+    @Res({ passthrough: true }) response,
+  ) {
+    const { user, token } = await this.authService.create(body);
+    response.cookie('token', token, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      signed: true,
+    });
+    return { messages: 'User created', result: { user } };
   }
 
   @UseGuards(AuthGuard('jwt'))

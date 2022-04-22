@@ -24,7 +24,7 @@ export class AuthService {
     }
 
     // tslint:disable-next-line: no-string-literal
-    const { password, ...result } = user['dataValues'];
+    const { password, avatar, ...result } = user['dataValues'];
     return result;
   }
 
@@ -47,7 +47,7 @@ export class AuthService {
     const newUser = await this.userService.create({ ...user, password: pass });
 
     // tslint:disable-next-line: no-string-literal
-    const { password, ...result } = newUser['dataValues'];
+    const { password, avatar, ...result } = newUser['dataValues'];
 
     // generate token
     const token = await this.generateToken(result);

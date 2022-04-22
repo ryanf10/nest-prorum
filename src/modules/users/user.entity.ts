@@ -6,7 +6,7 @@ export class User extends Model<User> {
     type: DataType.STRING,
     allowNull: false,
   })
-  name: string;
+  username: string;
 
   @Column({
     type: DataType.STRING,
@@ -21,10 +21,6 @@ export class User extends Model<User> {
   })
   password: string;
 
-  @Column({
-    type: DataType.ENUM,
-    values: ['male', 'female'],
-    allowNull: false,
-  })
-  gender: string;
+  @Column({ type: DataType.STRING })
+  avatar: string;
 }

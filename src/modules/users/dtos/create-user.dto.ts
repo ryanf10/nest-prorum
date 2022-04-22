@@ -7,7 +7,7 @@ enum Gender {
 
 export class CreateUserDto {
   @IsNotEmpty()
-  readonly name: string;
+  readonly username: string;
 
   @IsNotEmpty()
   @IsEmail()
@@ -16,8 +16,4 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(6)
   readonly password: string;
-
-  @IsNotEmpty()
-  @IsEnum(Gender, { message: 'gender must be either male or female' })
-  readonly gender: string;
 }
