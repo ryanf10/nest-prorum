@@ -39,6 +39,7 @@ export class UsersService {
       ],
       where: { id },
       include: { model: Post, attributes: [] },
+      group: ['User.id'],
     });
     return this.userResponse(user);
   }

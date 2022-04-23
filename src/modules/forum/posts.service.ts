@@ -69,7 +69,7 @@ export class PostsService {
         'category_id',
       ],
       where: { id },
-      include: [{ model: Comment }, { model: User }],
+      include: [{ model: Comment, required: false }, { model: User }],
     });
 
     const isFavorited: any = await this.postRepository.findOne({
@@ -80,16 +80,18 @@ export class PostsService {
           model: Favorite,
           attributes: [],
           where: { user_id: userId },
+          required: false,
         },
       ],
+      group: ['Post.id'],
     });
 
     const { jumlah, ...res } = isFavorited['dataValues'];
 
-    if (jumlah) {
-      post.setDataValue('isFavorited', 1);
-    } else {
+    if (jumlah == 0) {
       post.setDataValue('isFavorited', 0);
+    } else {
+      post.setDataValue('isFavorited', 1);
     }
 
     return post;
@@ -105,13 +107,14 @@ export class PostsService {
 
   async getPostByUser(id) {
     return await this.postRepository.findAll({
+      attributes: ['id', 'title', 'description', 'user_id'],
       where: { user_id: id },
       include: { model: Category },
     });
   }
 
   async storePost(title, description, category_id, path, user_id) {
-    return await this.postRepository.create({
+    const post = await this.postRepository.create({
       title,
       description,
       category_id,
@@ -119,6 +122,7 @@ export class PostsService {
       user_id,
       deleteableBefore: new Date(new Date().getTime() + 30 * 60 * 1000),
     });
+    return post;
   }
 
   async updatePost(id, title, description, path) {

@@ -22,7 +22,7 @@ export class User extends Model<User> {
   })
   password: string;
 
-  @Column({ type: DataType.STRING })
+  @Column({ type: DataType.BLOB })
   avatar: string;
 
   @HasMany(() => Post)
