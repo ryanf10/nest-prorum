@@ -1,4 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   ASC,
   CATEGORY,
@@ -53,7 +59,7 @@ export class PostsService {
   }
 
   async getOne(id, userId) {
-    const post = await this.postRepository.findOne({
+    const post: any = await this.postRepository.findOne({
       attributes: [
         'id',
         'title',
@@ -61,20 +67,30 @@ export class PostsService {
         'image',
         'createdAt',
         'category_id',
-        [sequelize.fn('count', sequelize.col('favorites.id')), 'is_favorited'],
       ],
       where: { id },
+      include: [{ model: Comment }, { model: User }],
+    });
+
+    const isFavorited: any = await this.postRepository.findOne({
+      attributes: [[sequelize.fn('count', sequelize.col('post_id')), 'jumlah']],
+      where: { id },
       include: [
-        { model: Comment },
-        { model: User },
         {
           model: Favorite,
-          where: { user_id: userId },
-          required: false,
           attributes: [],
+          where: { user_id: userId },
         },
       ],
     });
+
+    const { jumlah, ...res } = isFavorited['dataValues'];
+
+    if (jumlah) {
+      post.setDataValue('isFavorited', 1);
+    } else {
+      post.setDataValue('isFavorited', 0);
+    }
 
     return post;
   }
@@ -92,5 +108,42 @@ export class PostsService {
       where: { user_id: id },
       include: { model: Category },
     });
+  }
+
+  async storePost(title, description, category_id, path, user_id) {
+    return await this.postRepository.create({
+      title,
+      description,
+      category_id,
+      image: path,
+      user_id,
+      deleteableBefore: new Date(new Date().getTime() + 30 * 60 * 1000),
+    });
+  }
+
+  async updatePost(id, title, description, path) {
+    const post = await this.postRepository.findOne({ where: { id } });
+    await post.update({ title, description, image: path });
+    await post.save();
+    return post;
+  }
+
+  async deletePost(id, userId) {
+    const post = await this.postRepository.findOne({ where: { id } });
+    if (!post) {
+      throw new NotFoundException('post not found');
+    }
+
+    const maksTime = new Date(post.deleteableBefore).getTime();
+    const now = new Date().getTime();
+    if (maksTime < now) {
+      throw new BadRequestException('cannot delete now');
+    }
+
+    if (post.user_id != userId) {
+      throw new UnauthorizedException('you cannot delete this post');
+    }
+
+    return await post.destroy();
   }
 }

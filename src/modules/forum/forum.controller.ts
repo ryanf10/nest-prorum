@@ -1,16 +1,29 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   Param,
+  Patch,
+  Post,
   Query,
   Request,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PostsService } from './posts.service';
 import { CategoriesService } from './categories.service';
 import { FavoritesService } from './favorites.service';
+import { CreatePostDto } from './dtos/create-post.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { EditPostDto } from './dtos/edit-post.dto';
+import { CreateCommentDto } from './dtos/create-comment.dto';
+import { CommentsService } from './comments.service';
 
 @Controller('forum')
 export class ForumController {
@@ -18,6 +31,7 @@ export class ForumController {
     private readonly postsService: PostsService,
     private readonly categoriesService: CategoriesService,
     private readonly favoritesService: FavoritesService,
+    private readonly commentsService: CommentsService,
   ) {}
   @UseGuards(AuthGuard('jwt'))
   @Get('posts/')
@@ -48,7 +62,142 @@ export class ForumController {
   @Get('posts/:id')
   async getOnePost(@Request() req, @Param('id') id) {
     const post = await this.postsService.getOne(id, req.user.id);
+
     return { result: post };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('posts')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './storage/app/public/img/posts',
+        filename(
+          req: any,
+          file: Express.Multer.File,
+          callback: (error: Error | null, filename: string) => void,
+        ) {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+
+          return callback(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter(
+        req: any,
+        file: {
+          fieldname: string;
+          originalname: string;
+          encoding: string;
+          mimetype: string;
+          size: number;
+          destination: string;
+          filename: string;
+          path: string;
+          buffer: Buffer;
+        },
+        callback: (error: Error | null, acceptFile: boolean) => void,
+      ) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+          req.fileValidationError = 'Only image files are allowed!';
+          callback(null, false);
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  async storePost(
+    @Request() req,
+    @Body() body: CreatePostDto,
+    @UploadedFile() file,
+  ) {
+    const path = file ? file.path : null;
+    const post = await this.postsService.storePost(
+      body.title,
+      body.description,
+      body.category_id,
+      path,
+      req.user.id,
+    );
+    return { result: post };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('posts/:id')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './storage/app/public/img/posts',
+        filename(
+          req: any,
+          file: Express.Multer.File,
+          callback: (error: Error | null, filename: string) => void,
+        ) {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+
+          return callback(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter(
+        req: any,
+        file: {
+          fieldname: string;
+          originalname: string;
+          encoding: string;
+          mimetype: string;
+          size: number;
+          destination: string;
+          filename: string;
+          path: string;
+          buffer: Buffer;
+        },
+        callback: (error: Error | null, acceptFile: boolean) => void,
+      ) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+          req.fileValidationError = 'Only image files are allowed!';
+          callback(null, false);
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  async updatePost(
+    @Request() req,
+    @Param('id') id,
+    @Body() body: EditPostDto,
+    @UploadedFile() file,
+  ) {
+    const path = file ? file.path : null;
+    const post = await this.postsService.updatePost(
+      id,
+      body.title,
+      body.description,
+      path,
+    );
+    return { result: post };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('posts/:id')
+  async deletePost(@Request() req, @Param('id') id) {
+    const post = await this.postsService.deletePost(id, req.user.id);
+    // return { result: post };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('comments')
+  async storeComment(@Request() req, @Body() body: CreateCommentDto) {
+    const comment = await this.commentsService.storeComment(
+      body.content,
+      body.post_id,
+      req.user.id,
+    );
+    return { result: comment };
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -70,5 +219,24 @@ export class ForumController {
   async getFavorites(@Request() req) {
     const posts = await this.favoritesService.getFavorites(req.user.id);
     return { result: posts };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('favorites/:post_id')
+  async storeFavorite(@Request() req, @Param('post_id') post_id) {
+    const posts = await this.favoritesService.storeFavorite(
+      req.user.id,
+      post_id,
+    );
+    return { result: posts };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('favorites/:post_id')
+  async deleteFavorite(@Request() req, @Param('post_id') post_id) {
+    const posts = await this.favoritesService.deleteFavorite(
+      req.user.id,
+      post_id,
+    );
   }
 }

@@ -17,4 +17,15 @@ export class FavoritesService {
       include: { model: Post },
     });
   }
+
+  async storeFavorite(user_id, post_id) {
+    return await this.favoriteRepository.create({ user_id, post_id });
+  }
+
+  async deleteFavorite(user_id, post_id) {
+    const post = await this.favoriteRepository.findOne({
+      where: { user_id, post_id },
+    });
+    return await post.destroy();
+  }
 }
