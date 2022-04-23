@@ -8,6 +8,8 @@ import { User } from './user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { USER_REPOSITORY } from '../../core/constants';
 import * as bcrypt from 'bcrypt';
+import { Post } from '../forum/post.entity';
+import sequelize from 'sequelize';
 
 @Injectable()
 export class UsersService {
@@ -28,7 +30,16 @@ export class UsersService {
   }
 
   async profile(id: number): Promise<User> {
-    const user = await this.findOneById(id);
+    const user = await this.userRepository.findOne<User>({
+      attributes: [
+        'id',
+        'username',
+        'email',
+        [sequelize.fn('count', sequelize.col('posts.id')), 'posts_count'],
+      ],
+      where: { id },
+      include: { model: Post, attributes: [] },
+    });
     return this.userResponse(user);
   }
 

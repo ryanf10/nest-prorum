@@ -37,7 +37,6 @@ export class UsersController {
   async profileAvatar(@Request() req, @Res() res) {
     const avatar =
       (await this.userService.getAvatar(req.user.id)) ?? this.DEFAULT_AVATAR;
-
     return res.sendFile(avatar, { root: './' });
   }
 

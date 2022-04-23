@@ -6,10 +6,12 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { User } from '../users/user.entity';
 import { Comment } from './comment.entity';
 import { Category } from './category.entity';
+import { Favorite } from './favorite.entity';
 
 @Table
 export class Post extends Model<Post> {
@@ -53,4 +55,7 @@ export class Post extends Model<Post> {
 
   @HasMany(() => Comment)
   comments: Comment[];
+
+  @HasMany(() => Favorite)
+  favorites: Favorite[];
 }

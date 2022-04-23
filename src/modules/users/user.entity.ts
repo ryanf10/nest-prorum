@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
+import { Post } from '../forum/post.entity';
 
 @Table
 export class User extends Model<User> {
@@ -23,4 +24,7 @@ export class User extends Model<User> {
 
   @Column({ type: DataType.STRING })
   avatar: string;
+
+  @HasMany(() => Post)
+  posts: Post;
 }
