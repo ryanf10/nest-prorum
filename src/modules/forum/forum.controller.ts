@@ -9,6 +9,7 @@ import {
   Query,
   Request,
   Res,
+  StreamableFile,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -24,6 +25,10 @@ import { extname } from 'path';
 import { EditPostDto } from './dtos/edit-post.dto';
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { CommentsService } from './comments.service';
+import { Blob, Buffer } from 'buffer';
+import * as fs from 'fs';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 
 @Controller('forum')
 export class ForumController {
@@ -53,9 +58,27 @@ export class ForumController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('posts/:id/image')
-  async getPostImage(@Request() req, @Param('id') id, @Res() res) {
-    const image = await this.postsService.getPostImage(id);
-    res.sendFile(image, { root: './' });
+  async getPostImage(
+    @Request() req,
+    @Param('id') id,
+    @Res({ passthrough: true }) res,
+  ) {
+    const image: any = await this.postsService.getPostImage(id);
+    // const resultku: any = [];
+    // const newFile: any = fs.writeFileSync(resultku, image);
+    // res.send(new File([image], 'tes.png'));
+    // res.sendFile(image, { root: './' });
+
+    // const file = createReadStream(join(process.cwd(), image.buffer));
+    // return new StreamableFile(file);
+    console.log(image.buffer);
+
+    const buff = Buffer.from(image.buffer).toString('base64');
+    console.log(buff);
+
+    // res.send(new StreamableFile(buff));
+    return { result: buff };
+    // return { result: image.data };
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -70,21 +93,21 @@ export class ForumController {
   @Post('posts')
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './storage/app/public/img/posts',
-        filename(
-          req: any,
-          file: Express.Multer.File,
-          callback: (error: Error | null, filename: string) => void,
-        ) {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-
-          return callback(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
+      // storage: diskStorage({
+      //   destination: './storage/app/public/img/posts',
+      //   filename(
+      //     req: any,
+      //     file: Express.Multer.File,
+      //     callback: (error: Error | null, filename: string) => void,
+      //   ) {
+      //     const randomName = Array(32)
+      //       .fill(null)
+      //       .map(() => Math.round(Math.random() * 16).toString(16))
+      //       .join('');
+      //
+      //     return callback(null, `${randomName}${extname(file.originalname)}`);
+      //   },
+      // }),
       fileFilter(
         req: any,
         file: {
@@ -113,7 +136,12 @@ export class ForumController {
     @Body() body: CreatePostDto,
     @UploadedFile() file,
   ) {
-    const path = file ? file.path : null;
+    const bitmap = file.buffer.toString();
+    // console.log(bitmap);
+    // convert binary data to base64 encoded string
+    // const buffer = new Buffer(file.buffer).toString('base64');
+    // console.log(buffer);
+    const path = file.buffer;
     const post = await this.postsService.storePost(
       body.title,
       body.description,
@@ -128,21 +156,21 @@ export class ForumController {
   @Patch('posts/:id')
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './storage/app/public/img/posts',
-        filename(
-          req: any,
-          file: Express.Multer.File,
-          callback: (error: Error | null, filename: string) => void,
-        ) {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-
-          return callback(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
+      // storage: diskStorage({
+      //   destination: './storage/app/public/img/posts',
+      //   filename(
+      //     req: any,
+      //     file: Express.Multer.File,
+      //     callback: (error: Error | null, filename: string) => void,
+      //   ) {
+      //     const randomName = Array(32)
+      //       .fill(null)
+      //       .map(() => Math.round(Math.random() * 16).toString(16))
+      //       .join('');
+      //
+      //     return callback(null, `${randomName}${extname(file.originalname)}`);
+      //   },
+      // }),
       fileFilter(
         req: any,
         file: {
@@ -172,7 +200,7 @@ export class ForumController {
     @Body() body: EditPostDto,
     @UploadedFile() file,
   ) {
-    const path = file ? file.path : null;
+    const path = file ? file.buffer : null;
     const post = await this.postsService.updatePost(
       id,
       body.title,

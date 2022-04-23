@@ -19,6 +19,7 @@ import { UpdatePasswordDto } from './dtos/update-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Buffer } from 'buffer';
 
 @Controller('users')
 export class UsersController {
@@ -34,10 +35,10 @@ export class UsersController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/me/avatar')
-  async profileAvatar(@Request() req, @Res() res) {
-    const avatar =
-      (await this.userService.getAvatar(req.user.id)) ?? this.DEFAULT_AVATAR;
-    return res.sendFile(avatar, { root: './' });
+  async profileAvatar(@Request() req) {
+    const avatar: any = await this.userService.getAvatar(req.user.id);
+    const buff = Buffer.from(avatar.buffer).toString('base64');
+    return { result: buff };
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -65,21 +66,6 @@ export class UsersController {
   @Patch('/change-avatar')
   @UseInterceptors(
     FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: './storage/app/public/img/avatars',
-        filename(
-          req: any,
-          file: Express.Multer.File,
-          callback: (error: Error | null, filename: string) => void,
-        ) {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-
-          return callback(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
       fileFilter(
         req: any,
         file: {
@@ -111,14 +97,14 @@ export class UsersController {
     if (!file) {
       throw new BadRequestException('invalid file');
     }
-    await this.userService.changeAvatar(req.user.id, file.path);
+    await this.userService.changeAvatar(req.user.id, file.buffer);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('avatar/:id')
-  async getAvatar(@Param('id') id, @Res() res) {
-    const avatar =
-      (await this.userService.getAvatar(id)) ?? this.DEFAULT_AVATAR;
-    return res.sendFile(avatar, { root: './' });
+  async getAvatar(@Param('id') id) {
+    const avatar: any = await this.userService.getAvatar(id);
+    const buff = Buffer.from(avatar.buffer).toString('base64');
+    return { result: buff };
   }
 }

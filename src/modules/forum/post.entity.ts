@@ -28,7 +28,7 @@ export class Post extends Model<Post> {
   description: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.BLOB,
     allowNull: true,
   })
   image: string;
