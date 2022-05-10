@@ -29,14 +29,16 @@ export class ValidateInputPipe extends ValidationPipe {
   }
 
   private handleError(errors) {
-    const { message, ...errorResponse } = errors;
-    errorResponse['message'] = {};
+    const { message, error, ...errorResponse } = errors;
+    errorResponse['message'] = error;
+    errorResponse['errors'] = {};
     errors.message.forEach((error) => {
-      errorResponse['message'][error.property] = [];
+      errorResponse['errors'][error.property] = [];
       for (const [key, value] of Object.entries(error.constraints)) {
-        errorResponse['message'][error.property].push(value);
+        errorResponse['errors'][error.property].push(value);
       }
     });
+
     return errorResponse;
   }
 }
