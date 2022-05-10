@@ -40,6 +40,13 @@ export class AuthService {
       throw new ConflictException('Email already exists');
     }
 
+    const existUsername = await this.userService.findOneByUsername(
+      user.username,
+    );
+    if (existUsername) {
+      throw new ConflictException('Username already exist');
+    }
+
     // hash the password
     const pass = await this.userService.hashPassword(user.password);
 
