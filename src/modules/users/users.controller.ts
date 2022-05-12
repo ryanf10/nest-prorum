@@ -37,19 +37,19 @@ export class UsersController {
   @Get('/me/avatar')
   async profileAvatar(@Request() req) {
     const avatar: any = await this.userService.getAvatar(req.user.id);
-    const buff = Buffer.from(avatar.buffer).toString('base64');
+    const buff = avatar ? Buffer.from(avatar.buffer).toString('base64') : null;
     return { result: buff };
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Patch('/me')
-  async updateProfile(@Request() req, @Body() body: UpdateUserDto) {
-    const user = await this.userService.updateProfile(
-      req.user.id,
-      body.username,
-    );
-    return { result: { user } };
-  }
+  // @UseGuards(AuthGuard('jwt'))
+  // @Patch('/me')
+  // async updateProfile(@Request() req, @Body() body: UpdateUserDto) {
+  //   const user = await this.userService.updateProfile(
+  //     req.user.id,
+  //     body.username,
+  //   );
+  //   return { result: { user } };
+  // }
 
   @UseGuards(AuthGuard('jwt'))
   @Patch('/change-password')
@@ -94,17 +94,18 @@ export class UsersController {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);
     }
-    if (!file) {
-      throw new BadRequestException('invalid file');
-    }
-    await this.userService.changeAvatar(req.user.id, file.buffer);
+    // if (!file) {
+    //   throw new BadRequestException('invalid file');
+    // }
+    const buffer = file ? file.buffer : null;
+    await this.userService.changeAvatar(req.user.id, buffer);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('avatar/:id')
   async getAvatar(@Param('id') id) {
     const avatar: any = await this.userService.getAvatar(id);
-    const buff = Buffer.from(avatar.buffer).toString('base64');
+    const buff = avatar ? Buffer.from(avatar.buffer).toString('base64') : null;
     return { result: buff };
   }
 }

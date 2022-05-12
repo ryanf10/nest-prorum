@@ -29,6 +29,7 @@ export class PostsService {
     dir = dir == DESC ? DESC : ASC;
 
     const queryOptions = {
+      attributes: ['id', 'title', 'description', 'createdAt', 'category_id'],
       where: {},
       include: {
         model: Category,
@@ -60,16 +61,16 @@ export class PostsService {
 
   async getOne(id, userId) {
     const post: any = await this.postRepository.findOne({
-      attributes: [
-        'id',
-        'title',
-        'description',
-        'image',
-        'createdAt',
-        'category_id',
-      ],
+      attributes: ['id', 'title', 'description', 'createdAt', 'category_id'],
       where: { id },
-      include: [{ model: Comment, required: false }, { model: User }],
+      include: [
+        {
+          model: Comment,
+          required: false,
+          include: [{ model: User, attributes: ['id', 'username'] }],
+        },
+        { model: User, attributes: ['id', 'username'] },
+      ],
     });
 
     const isFavorited: any = await this.postRepository.findOne({
@@ -122,14 +123,16 @@ export class PostsService {
       user_id,
       deleteableBefore: new Date(new Date().getTime() + 30 * 60 * 1000),
     });
-    return post;
+    const { image, ...res } = post['dataValues'];
+    return res;
   }
 
   async updatePost(id, title, description, path) {
     const post = await this.postRepository.findOne({ where: { id } });
     await post.update({ title, description, image: path });
     await post.save();
-    return post;
+    const { image, ...res } = post['dataValues'];
+    return res;
   }
 
   async deletePost(id, userId) {

@@ -14,7 +14,10 @@ export class FavoritesService {
     return await this.favoriteRepository.findAll({
       where: { user_id: id },
       attributes: [],
-      include: { model: Post },
+      include: {
+        model: Post,
+        attributes: ['id', 'title', 'description', 'category_id'],
+      },
     });
   }
 

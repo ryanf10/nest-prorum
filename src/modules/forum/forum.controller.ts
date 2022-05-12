@@ -71,10 +71,10 @@ export class ForumController {
 
     // const file = createReadStream(join(process.cwd(), image.buffer));
     // return new StreamableFile(file);
-    console.log(image.buffer);
+    // console.log(image.buffer);
 
-    const buff = Buffer.from(image.buffer).toString('base64');
-    console.log(buff);
+    const buff = image ? Buffer.from(image.buffer).toString('base64') : null;
+    // console.log(buff);
 
     // res.send(new StreamableFile(buff));
     return { result: buff };
@@ -121,7 +121,7 @@ export class ForumController {
     @Body() body: CreatePostDto,
     @UploadedFile() file,
   ) {
-    const path = file.buffer;
+    const path = file ? file.buffer : null;
     const post = await this.postsService.storePost(
       body.title,
       body.description,
