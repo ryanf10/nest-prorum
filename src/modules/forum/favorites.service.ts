@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { FAVORITE_REPOSITORY } from '../../core/constants';
 import { Favorite } from './favorite.entity';
 import { Post } from './post.entity';
+import { Category } from './category.entity';
 
 @Injectable()
 export class FavoritesService {
@@ -17,6 +18,7 @@ export class FavoritesService {
       include: {
         model: Post,
         attributes: ['id', 'title', 'description', 'category_id'],
+        include: [{ model: Category }],
       },
     });
   }
