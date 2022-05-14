@@ -68,6 +68,7 @@ export class PostsService {
           model: Comment,
           required: false,
           include: [{ model: User, attributes: ['id', 'username'] }],
+          order: ['createdAt'],
         },
         { model: User, attributes: ['id', 'username'] },
       ],
@@ -94,7 +95,6 @@ export class PostsService {
     } else {
       post.setDataValue('isFavorited', 1);
     }
-
     return post;
   }
 

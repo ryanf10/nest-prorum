@@ -27,6 +27,7 @@ export class CategoriesService {
         },
       ],
       group: ['Category.id'],
+      order: ['id'],
     });
   }
 
