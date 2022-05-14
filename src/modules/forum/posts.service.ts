@@ -71,6 +71,7 @@ export class PostsService {
           order: ['createdAt'],
         },
         { model: User, attributes: ['id', 'username'] },
+        { model: Category, attributes: ['id', 'name'] },
       ],
     });
 
