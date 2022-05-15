@@ -48,6 +48,22 @@ export class UsersService {
     return this.userResponse(user);
   }
 
+  async info(id: number): Promise<User> {
+    const user = await this.userRepository.findOne<User>({
+      attributes: [
+        'id',
+        'username',
+        'email',
+        [sequelize.fn('count', sequelize.col('posts.id')), 'posts_count'],
+      ],
+      where: { id },
+      include: { model: Post, attributes: [] },
+      group: ['User.id'],
+    });
+    const { avatar, password, email, ...result } = user['dataValues'];
+    return result;
+  }
+
   async updateProfile(id: number, username: string): Promise<User> {
     const user = await this.findOneById(id);
     await user.update({ username });

@@ -24,7 +24,7 @@ import { Buffer } from 'buffer';
 @Controller('users')
 export class UsersController {
   DEFAULT_AVATAR = 'public\\img\\avatar.jpg';
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly userService: UsersService) { }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/me')
@@ -107,5 +107,12 @@ export class UsersController {
     const avatar: any = await this.userService.getAvatar(id);
     const buff = avatar ? Buffer.from(avatar.buffer).toString('base64') : null;
     return { result: buff };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('info/:id')
+  async getInfo(@Param('id') id) {
+    const user = await this.userService.info(id);
+    return { result: { user } };
   }
 }
