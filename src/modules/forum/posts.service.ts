@@ -61,7 +61,7 @@ export class PostsService {
 
   async getOne(id, userId) {
     const post: any = await this.postRepository.findOne({
-      attributes: ['id', 'title', 'description', 'createdAt', 'category_id'],
+      attributes: ['id', 'title', 'description', 'createdAt', 'category_id', 'deleteableBefore'],
       where: { id },
       include: [
         {
