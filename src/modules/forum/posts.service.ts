@@ -138,8 +138,13 @@ export class PostsService {
     return res;
   }
 
-  async updatePost(id, title, description, path) {
+  async updatePost(id, title, description, path, userId) {
     const post = await this.postRepository.findOne({ where: { id } });
+
+    if (post.user_id != userId) {
+      throw new UnauthorizedException('you cannot edit this post');
+    }
+
     await post.update({ title, description, image: path });
     await post.save();
     const { image, ...res } = post['dataValues'];

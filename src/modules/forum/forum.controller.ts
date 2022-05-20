@@ -171,6 +171,7 @@ export class ForumController {
       body.title,
       body.description,
       path,
+      req.user.id,
     );
     return { result: post };
   }
