@@ -17,7 +17,7 @@ export class FavoritesService {
       attributes: [],
       include: {
         model: Post,
-        attributes: ['id', 'title', 'description', 'category_id'],
+        attributes: ['id', 'title', 'description', 'category_id', 'createdAt'],
         include: [{ model: Category }],
       },
     });
