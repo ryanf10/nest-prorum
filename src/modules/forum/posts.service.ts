@@ -35,6 +35,7 @@ export class PostsService {
         model: Category,
         where: {},
         order: [],
+        as: 'category',
       },
       order: [],
     };
@@ -49,8 +50,10 @@ export class PostsService {
     }
 
     if (sortBy == CATEGORY) {
-      queryOptions.include.order.push(['name', dir]);
-      queryOptions.order = [['createdAt', DESC]];
+      queryOptions.order = [
+        ['category', 'name', ASC],
+        ['createdAt', DESC],
+      ];
     }
 
     console.log(queryOptions);
@@ -61,7 +64,14 @@ export class PostsService {
 
   async getOne(id, userId) {
     const post: any = await this.postRepository.findOne({
-      attributes: ['id', 'title', 'description', 'createdAt', 'category_id', 'deleteableBefore'],
+      attributes: [
+        'id',
+        'title',
+        'description',
+        'createdAt',
+        'category_id',
+        'deleteableBefore',
+      ],
       where: { id },
       include: [
         {
