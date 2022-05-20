@@ -1,3 +1,13 @@
+# Final Project Teknologi Bergerak (Backend)
+
+Nama: Ryan Fernaldy<br>
+NRP: 05111940000152<br>
+
+Backend Aplikasi mobile forum diskusi bagi para programmer yang dibuat dengan NestJS.
+
+<br>
+<br>
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
