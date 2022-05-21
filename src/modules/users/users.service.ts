@@ -143,7 +143,10 @@ export class UsersService {
       to: user.email, // list of receivers
       subject: 'Password reset', // Subject line
       text: '', // plain text body
-      html: `Your reset token is<br><h1><b>${user.reset_token}</b></h1>`, // html body
+      html: `Your reset token is<br>
+             <h3><b>${user.reset_token}</b></h3>
+             <a href="https://prorum.vercel.app/reset/${user.reset_token}"><h3>Please click this link</h3></a>
+             `, // html body
     });
 
     console.log('Message sent: %s', info.messageId);
