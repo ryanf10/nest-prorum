@@ -25,6 +25,9 @@ export class User extends Model<User> {
   @Column({ type: DataType.BLOB })
   avatar: string;
 
+  @Column({ type: DataType.STRING, unique: true })
+  reset_token: string;
+
   @HasMany(() => Post)
   posts: Post;
 }

@@ -4,8 +4,13 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
   Param,
   Patch,
+  Post,
+  Query,
   Request,
   Res,
   UploadedFile,
@@ -20,11 +25,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Buffer } from 'buffer';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 
 @Controller('users')
 export class UsersController {
   DEFAULT_AVATAR = 'public\\img\\avatar.jpg';
-  constructor(private readonly userService: UsersService) { }
+  constructor(private readonly userService: UsersService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/me')
@@ -50,6 +57,23 @@ export class UsersController {
   //   );
   //   return { result: { user } };
   // }
+
+  @Post('/forgot-password')
+  @HttpCode(200)
+  async forgotPassword(@Body() body: ForgotPasswordDto) {
+    const token = await this.userService.forgotPassword(body.email);
+    return { result: token };
+  }
+
+  @Patch('/reset-password')
+  async resetPassword(
+    @Request() req,
+    @Body() body: ResetPasswordDto,
+    @Query('token') token,
+  ) {
+    await this.userService.resetPassword(token, body.new_password);
+    return { messages: 'Password changed successfully' };
+  }
 
   @UseGuards(AuthGuard('jwt'))
   @Patch('/change-password')

@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './transform.interceptor';
 import { ForumModule } from './modules/forum/forum.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
