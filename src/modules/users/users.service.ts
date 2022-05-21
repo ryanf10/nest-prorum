@@ -133,7 +133,7 @@ export class UsersService {
       secure: true, // true for 465, false for other ports
       auth: {
         user: 'prorumapp@gmail.com', // generated ethereal user
-        pass: 'kptemyrzfpceaqsi', // generated ethereal password
+        pass: 'loumeoyotagqfepf', // generated ethereal password
       },
     });
 
