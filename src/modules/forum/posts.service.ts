@@ -119,7 +119,7 @@ export class PostsService {
 
   async getPostByUser(id) {
     return await this.postRepository.findAll({
-      attributes: ['id', 'title', 'description', 'user_id'],
+      attributes: ['id', 'title', 'description', 'user_id', 'createdAt'],
       where: { user_id: id },
       include: { model: Category },
     });
